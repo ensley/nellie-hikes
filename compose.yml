@@ -1,0 +1,17 @@
+services:
+  app:
+    build:
+      context: .
+    environment:
+      NELLIE_SITE_USER_FILE: /run/secrets/nellie_site_user
+      NELLIE_SITE_PASSWORD_FILE: /run/secrets/nellie_site_password
+    secrets:
+      - nellie_site_user
+      - nellie_site_password
+    volumes:
+      - ${DOCKER_PHOTO_DIR}:/app/img
+secrets:
+  nellie_site_user:
+    environment: NELLIE_SITE_USER
+  nellie_site_password:
+    environment: NELLIE_SITE_PASSWORD
