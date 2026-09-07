@@ -73,15 +73,25 @@ def download_images(links, timestamps):
     for img_url, ts in zip(links, timestamps):
         filename = img_url.split("/")[-1]
         path = imgdir / filename
-        logger.info(filename)
-        if not path.exists():
-            img_data = requests.get(img_url, timeout=30)
-            logger.info("DOWNLOADING %s", filename)
-            with open(path, "wb") as fh:
-                fh.write(img_data.content)
+        if path.exists():
+            continue
 
-            photo_time = datetime.strptime(ts.strip(), "%b %d, %Y %H:%M%p")
+        logger.info("DOWNLOADING %s", filename)
+        img_data = requests.get(img_url, timeout=30)
+        img_data.raise_for_status()
+        with open(path, "wb") as fh:
+            fh.write(img_data.content)
+
+        # Best-effort: stamp the file with the photo's own timestamp. A single
+        # unparseable timestamp should never abort the whole run, so failures
+        # here are logged and skipped rather than raised.
+        try:
+            # %I (12-hour) + %p, not %H (24-hour), or afternoon photos land in
+            # the morning (e.g. "3:45PM" -> 03:45).
+            photo_time = datetime.strptime(ts.strip(), "%b %d, %Y %I:%M%p")
             os.utime(path, (photo_time.timestamp(), photo_time.timestamp()))
+        except ValueError:
+            logger.warning("Could not parse timestamp %r for %s", ts, filename)
 
     return imgdir
 
