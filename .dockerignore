@@ -32,3 +32,9 @@
 **/tests
 **/values.dev.yaml
 LICENSE
+# Synology Task Scheduler drops a root-owned synoscheduler/ dir inside the
+# project on the NAS; it is unreadable by the Docker build and must be excluded.
+**/synoscheduler
+# Runtime/local artifacts that shouldn't enter the build context.
+**/scrape.log
+**/*.bak
