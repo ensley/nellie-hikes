@@ -17,10 +17,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     echo "Package: *\nPin: origin packages.mozilla.org\nPin-Priority: 1000\n\n" | tee /etc/apt/preferences.d/mozilla > /dev/null && \
     # Update your package list and install the Firefox .deb package
     apt-get update -qq > /dev/null && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -qq libc-bin firefox > /dev/null
+    # Pin Firefox to a known-good version so it stays in sync with the pinned
+    # geckodriver below. Bump both together (and check geckodriver's
+    # firefox-compatibility note) when upgrading.
+    DEBIAN_FRONTEND=noninteractive apt-get install -qq libc-bin firefox=155.0.1~build1 > /dev/null
 
 RUN curl -fL -o /tmp/geckodriver.tar.gz \
-         https://github.com/mozilla/geckodriver/releases/download/v0.35.0/geckodriver-v0.35.0-linux64.tar.gz \
+         https://github.com/mozilla/geckodriver/releases/download/v0.37.1/geckodriver-v0.37.1-linux64.tar.gz \
  && tar -xzf /tmp/geckodriver.tar.gz -C /tmp/ \
  && chmod +x /tmp/geckodriver \
  && mv /tmp/geckodriver /usr/local/bin/ \
